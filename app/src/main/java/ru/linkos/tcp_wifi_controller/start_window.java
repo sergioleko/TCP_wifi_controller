@@ -19,30 +19,59 @@ import java.util.Objects;
 public class start_window extends AppCompatActivity {
 public String targetIp;
 public String targetPort;
+public boolean interrupt;
+public int counter;
     WiFiOperations wfo = new WiFiOperations();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_window);
-
+        interrupt = false;
+        counter = 0;
         wfo.isWiFoOK(getApplicationContext());
 
 
 
     }
 
-    public void checkWifi (View view) throws IOException {
+    public void checkWifi (View view) throws IOException, InterruptedException {
         TextInputLayout ipInput = findViewById(R.id.inputIP);
-        TextInputLayout portInput = findViewById(R.id.inputPort);
+        //TextInputLayout portInput = findViewById(R.id.inputPort);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            targetIp = Objects.requireNonNull(ipInput.getEditText()).toString();
+            targetIp = ipInput.getEditText().getText().toString();
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             targetPort = Objects.requireNonNull(portInput.getEditText()).toString();
+        }*/
+        final Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    interrupt = wfo.pingStation(targetIp, getApplicationContext());
+
+                    } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+
+            }
+
+        );
+        networkThread.setDaemon(true);
+        networkThread.start();
+
+        if (interrupt){
+            networkThread.interrupt();
         }
-        
-        wfo.pingStation(targetIp,targetIp);
+        else{
+            Toast.makeText(this, "Station is reachable", Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
-}
+
+    }
+
+

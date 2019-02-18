@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -33,6 +34,7 @@ public class WiFiOperations {
 
             Log.i("WiFi ", "enabled");
             if (wfm.getConnectionInfo().getSSID().equals(wifi215)) {
+                Log.i("Wifi is: ", "OK");
                 // Toast.makeText(this, "Wifi connected", Toast.LENGTH_SHORT).show();
             } else {
                 errNo = 2;
@@ -73,20 +75,37 @@ public class WiFiOperations {
                 curContext.startActivity(errorIntent);
                 break;
 
+
+
         }
 
     }
 
-    public int pingStation(String ip, String port) throws IOException {
-        InetAddress stationIP = InetAddress.getByName(ip);
-        if (stationIP.isReachable(1000 )){
-            Log.i("station is: ", "reachable");
-        }
-        else {
-            errNo = 3;
-            return errNo;
+    public boolean pingStation(String ip, Context curContext) throws IOException {
+        //InetAddress stationIP = InetAddress.getByName(ip);
+        Log.i ("IP is: ", String.valueOf(InetAddress.getByName(ip)));
+        if (InetAddress.getByName(ip) != null) {
 
+            InetAddress stationIP = InetAddress.getByName(ip);
+
+            if (stationIP.isReachable(10)){
+                Log.i("station is: ", "reachable");
+
+
+                return false;
+            }
+            else {
+                Log.i("station is: ", "unreachable");
+                errNo = 3;
+                startError(curContext);
+    return true;
+            }
         }
-        return errNo;
+        else{
+            Log.i("station is: ", "unreachable vasche");
+            return true;
+        }
+
+
     }
 }
